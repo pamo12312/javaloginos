@@ -1,16 +1,23 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 public class LoginSystem extends JFrame {
 
     private JFrame loginFrame;
     private JTextField usernameField;
     private JPasswordField passwordField;
+
+    private JLabel textLabel;
+    private JLabel hodinyLabel;
+    private JMenuBar menuBar;
+
+    private boolean prihlaseny = false;
 
     public LoginSystem() {
         super("Login System");
@@ -40,6 +47,14 @@ public class LoginSystem extends JFrame {
         add(new JLabel()); // Prázdný prostor pro oddělení
         add(registerButton);
 
+        // Přidání textu a hodin do navigačního panelu
+        textLabel = new JLabel("Vítejte!");
+        hodinyLabel = new JLabel();
+
+        // Vytvoření navigačního menu
+        menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+
         // Nastavení akce pro tlačítko Login
         loginButton.addActionListener(new ActionListener() {
             @Override
@@ -48,15 +63,17 @@ public class LoginSystem extends JFrame {
                 char[] passwordChars = passwordField.getPassword();
                 String password = new String(passwordChars);
 
-                // Můžeš zde přidat své vlastní ověřování a další logiku
                 if (jeUzivatelVDatabazi(username, password)) {
-                    // Po úspěšném přihlášení zobrazí nové okno nebo dialogové okno
+                    // Po úspěšném přihlášení aktualizujeme stav na přihlášený
+                    prihlaseny = true;
+                    // Aktualizujeme obsah menu
+                    createMenuBar();
+
                     zobrazHlavniOknoPoPrihlaseni(username);
                 } else {
                     JOptionPane.showMessageDialog(loginFrame, "Chybné přihlašovací údaje", "Chyba přihlášení", JOptionPane.ERROR_MESSAGE);
                 }
 
-                // Bezpečné smazání hesla
                 Arrays.fill(passwordChars, ' ');
                 passwordField.setText("");
             }
@@ -70,43 +87,36 @@ public class LoginSystem extends JFrame {
                 char[] passwordChars = passwordField.getPassword();
                 String password = new String(passwordChars);
 
-                // Zde můžete přidat vlastní logiku pro registraci
-                // Například zápis do databáze, kontrola duplicity, atd.
-
-                // Zobrazí prázdné okno s pozdravem a jménem a heslem uživatele
                 zobrazPrazdneOkno("Registrace úspěšná!\nJméno: " + username + "\nHeslo: " + password);
 
-                // Přidá jméno a heslo uživatele do textové databáze
                 pridejUzivateleDoDatabaze(username, password);
 
-                // Vrátí se zpět na úvodní obrazovku
                 zobrazUvodniObrazovku();
             }
         });
 
-        // Nastavení zavírání okna
+        // Aktualizujeme obsah menu na začátku
+      createMenuBar();
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(300, 200);
-        setLocationRelativeTo(null); // Pro umístění do středu obrazovky
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
-    // Metoda pro ověření uživatele v textové databázi
     private boolean jeUzivatelVDatabazi(String username, String password) {
         String cestaKsouboru = "java.txt";
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(cestaKsouboru))) {
             String radek;
             while ((radek = bufferedReader.readLine()) != null) {
-                // Rozdělení řádku na jméno a heslo
                 String[] uzivatelHeslo = radek.split(":");
                 if (uzivatelHeslo.length == 2) {
                     String jmenoVDatabazi = uzivatelHeslo[0];
                     String hesloVDatabazi = uzivatelHeslo[1];
 
-                    // Porovnání s aktuálním uživatelem
                     if (jmenoVDatabazi.equals(username) && hesloVDatabazi.equals(password)) {
-                        return true; // Uživatel nalezen
+                        return true;
                     }
                 }
             }
@@ -114,35 +124,28 @@ public class LoginSystem extends JFrame {
             e.printStackTrace();
         }
 
-        return false; // Uživatel nenalezen
+        return false;
     }
 
-    // Metoda pro zobrazení prázdného okna s pozdravem
     private void zobrazPrazdneOkno(String pozdrav) {
-        // Vytvoření prázdného panelu s pozdravem
         JPanel prazdnyPanel = new JPanel();
         prazdnyPanel.setLayout(new BorderLayout());
 
         JLabel pozdravLabel = new JLabel(pozdrav);
         prazdnyPanel.add(pozdravLabel, BorderLayout.CENTER);
 
-        // Nastavení prázdného panelu jako obsahu hlavního okna
         setContentPane(prazdnyPanel);
 
-        // Aktualizace rozhraní
         revalidate();
 
-        // Nastavení velikosti a umístění okna
         setSize(300, 200);
         setLocationRelativeTo(null);
     }
 
-    // Metoda pro přidání uživatele do textové databáze
     private void pridejUzivateleDoDatabaze(String username, String password) {
         String cestaKsouboru = "java.txt";
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(cestaKsouboru, true))) {
-            // Přidání nového uživatele na konec souboru
             writer.write(username + ":" + password);
             writer.newLine();
         } catch (IOException e) {
@@ -150,9 +153,7 @@ public class LoginSystem extends JFrame {
         }
     }
 
-    // Metoda pro zobrazení úvodní obrazovky
     private void zobrazUvodniObrazovku() {
-        // Vytvoření nového hlavního okna (úvodní obrazovky)
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -160,42 +161,35 @@ public class LoginSystem extends JFrame {
             }
         });
 
-        // Zavření stávajícího okna
         dispose();
     }
 
-    // Metoda pro zobrazení hlavního okna po přihlášení
-// Metoda pro zobrazení hlavního okna po přihlášení
     private void zobrazHlavniOknoPoPrihlaseni(String username) {
-        // Vytvoření nového okna po přihlášení
         JFrame hlavniOkno = new JFrame("Hlavní Okno");
         hlavniOkno.setLayout(new BorderLayout());
+        JMenuBar menuBar = createMenuBar();
 
-        // Přidání komponent do hlavního okna po přihlášení
+        // Nastavení menu baru hlavnímu oknu
+        hlavniOkno.setJMenuBar(menuBar);
         JLabel uvitaciText = new JLabel("Vítejte, " + username + "!");
         hlavniOkno.add(uvitaciText, BorderLayout.CENTER);
 
-        // Přidání tlačítek s písmeny a textem
         JButton buttonA = vytvorTlacitko("A", "a_icon.png", "Text pro tlačítko A", 100, 100);
-        JButton buttonB = vytvorTlacitko("B", "kalkulacka.png", "Text pro tlačítko B",100,100);
+        JButton buttonB = vytvorTlacitko("B", "kalkulacka.png", "Text pro tlačítko B", 100, 100);
 
-        // Přidání tlačítek do spodního panelu
         JPanel bottomPanel = new JPanel();
         bottomPanel.add(buttonA);
         bottomPanel.add(buttonB);
         hlavniOkno.add(bottomPanel, BorderLayout.SOUTH);
 
-        // Nastavení zavírání okna
         hlavniOkno.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         hlavniOkno.setSize(600, 600);
-        hlavniOkno.setLocationRelativeTo(null); // Pro umístění do středu obrazovky
+        hlavniOkno.setLocationRelativeTo(null);
         hlavniOkno.setVisible(true);
 
-        // Zavření stávajícího okna přihlášení
         dispose();
     }
-    // Metoda pro vytvoření tlačítka s ikonou a písmenem
-    // Metoda pro vytvoření tlačítka s ikonou a písmenem
+
     private JButton vytvorTlacitko(String text, String iconName, String buttonText, int buttonWidth, int buttonHeight) {
         JButton button = new JButton(text);
         try {
@@ -212,13 +206,11 @@ public class LoginSystem extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (text.equals("A")) {
-                    // Vytvoření nového okna s názvem tlačítka A
                     JFrame podokno = new JFrame(text);
                     podokno.setSize(300, 200);
                     podokno.setLocationRelativeTo(null);
                     podokno.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-                    // Přidání textu do nového okna v závislosti na tlačítku
                     JLabel label = new JLabel(buttonText);
                     label.setHorizontalAlignment(SwingConstants.CENTER);
                     label.setVerticalAlignment(SwingConstants.CENTER);
@@ -226,7 +218,6 @@ public class LoginSystem extends JFrame {
 
                     podokno.setVisible(true);
                 } else if (text.equals("B")) {
-                    // Spuštění rozšířené kalkulačky
                     RozsirenaKalkulacka kalkulacka = new RozsirenaKalkulacka();
                     kalkulacka.setVisible(true);
                 }
@@ -235,9 +226,58 @@ public class LoginSystem extends JFrame {
         return button;
     }
 
+    private JMenuBar createMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
 
+        // Vytvoření menu
+        JMenu menu = new JMenu("Menu");
+        JMenuItem menuItem = new JMenuItem("Nějaká akce");
 
+        // Nastavení akce pro položku menu
+        menuItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(loginFrame, "Byla provedena nějaká akce!");
+            }
+        });
 
+        // Přidání položek do menu
+        menu.add(menuItem);
+
+        // Přidání položek do menu baru
+        menuBar.add(vytvorCasLabel());
+        menuBar.add(Box.createHorizontalGlue());
+        menuBar.add(vytvorDatumLabel());
+        menuBar.add(menu);
+
+        return menuBar;
+    }
+
+    private JLabel vytvorCasLabel() {
+        JLabel casLabel = new JLabel("Čas: ");
+        Timer casTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                casLabel.setText("Čas: " + sdf.format(new Date()));
+            }
+        });
+        casTimer.start();
+        return casLabel;
+    }
+
+    private JLabel vytvorDatumLabel() {
+        JLabel datumLabel = new JLabel("Datum: ");
+        Timer datumTimer = new Timer(5000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                datumLabel.setText("Datum: " + sdf.format(new Date()));
+            }
+        });
+        datumTimer.start();
+        return datumLabel;
+    }
 
 
     public static void main(String[] args) {
