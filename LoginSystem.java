@@ -230,28 +230,56 @@ public class LoginSystem extends JFrame {
         JMenuBar menuBar = new JMenuBar();
 
         // Vytvoření menu
-        JMenu menu = new JMenu("Menu");
-        JMenuItem menuItem = new JMenuItem("Nějaká akce");
+        JMenu menu = new JMenu("\uF8FF");
 
-        // Nastavení akce pro položku menu
-        menuItem.addActionListener(new ActionListener() {
+        // Položka A akce
+        JMenuItem menuItemA = new JMenuItem("A akce");
+        menuItemA.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(loginFrame, "Byla provedena nějaká akce!");
+                provedAkciA();
+            }
+        });
+
+        // Položka B akce
+        JMenuItem menuItemB = new JMenuItem("B akce");
+        menuItemB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                provedAkciB();
             }
         });
 
         // Přidání položek do menu
-        menu.add(menuItem);
+        menu.add(menuItemA);
+        menu.add(menuItemB);
 
-        // Přidání položek do menu baru
-        menuBar.add(vytvorCasLabel());
-        menuBar.add(Box.createHorizontalGlue());
-        menuBar.add(vytvorDatumLabel());
+        // Přidání menu do menu baru
         menuBar.add(menu);
+
+        // Prázdný panel pro posunutí dalších položek na nový řádek
+        JPanel fillerPanel = new JPanel();
+        menuBar.add(fillerPanel);
+
+        // Přidání položek do menu baru pro datum a čas
+        menuBar.add(vytvorDatumLabel());
+        menuBar.add(Box.createHorizontalStrut(10)); // Horizontální mezeru pro oddělení
+        menuBar.add(vytvorCasLabel());
 
         return menuBar;
     }
+
+    private void provedAkciA() {
+        // Zde můžete implementovat akci pro A
+        JOptionPane.showMessageDialog(loginFrame, "Provedena akce A");
+    }
+
+    private void provedAkciB() {
+        // Zde můžete implementovat akci pro B
+        JOptionPane.showMessageDialog(loginFrame, "Provedena akce B");
+    }
+
+
 
     private JLabel vytvorCasLabel() {
         JLabel casLabel = new JLabel("Čas: ");
